@@ -1,10 +1,15 @@
 # SaveAccess (C#)
 
-SaveAccess is a system for easily saving data to text files in a JSON format. It is designed to search through trees and save saveable nodes, which means you won't have to code any special cases, and any nodes added at runtime will be saved properly with no extra work.<br/>
+SaveAccess is a system for easily saving data to text files in a JSON format. <br/> <br/>
+Features Include: <br/>
+ - Saving entire scene trees.
+ - Automatic JSON serialization.
+ - Support for recursive save structures.
+ - ISaveable interface to allow modular save/load structures.
 
-# Functionality
+# Classes
 
-This plugin consists of 3 central parts: (all classes are located under the Ardot.SaveSystems namespace) <br/>
+This plugin consists of 3 central parts: (all are located under the Ardot.SaveSystems namespace) <br/>
 - SaveAccess (used to save ISaveable nodes and SaveData to files) <br/>
 - SaveData (used to store and move data to and from ISaveable objects) <br/>
 - ISaveable (used by SaveAccess to interface with nodes and objects that need to be saved) <br/>
@@ -17,7 +22,7 @@ For more information, see the code documentation.
 
 You have a node, 'Player'. You need to save its position. This is its code:
 
-```
+``` C#
 public partial class Player : Node2D
 {
     public override void _Process()
@@ -29,7 +34,7 @@ public partial class Player : Node2D
 
 To make it save, you would need to set it up like this. (this is using the ISaveable default implementation template)
 
-```
+``` C#
 using Ardot.SaveSystems;
 
 public partial class Player : Node2D, ISaveable
@@ -65,8 +70,8 @@ public partial class Player : Node2D, ISaveable
 ```
 
 Now, all you would need to save the player would be to have some script that creates a SaveAccess and runs SaveTree().
-
-```
+ 
+``` C#
 public partial class SceneRootNode : Node2D
 {
     public void SaveScene()
@@ -85,7 +90,7 @@ Now, imagine that Player has an inventory. This inventory is a Resource with ISa
 
 What you can do is set up Player to save and load its inventory by including the inventory's SaveData in the player's SaveData.
 
-```
+``` C#
 using Ardot.SaveSystems;
 
 public partial class Player : Node2D, ISaveable
