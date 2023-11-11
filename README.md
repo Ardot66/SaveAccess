@@ -114,7 +114,7 @@ public partial class Player : Node2D, ISaveable
         GlobalPosition = data[0].AsVector2();
 
         //Loading playerInventory with the second value of data, which is SaveData
-        playerInventory.Load(data[1])
+        playerInventory.Load(data[1]);
     }
     
     public StringName GetLoadKey(params Variant[] parameters)
