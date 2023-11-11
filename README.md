@@ -71,10 +71,10 @@ public partial class SceneRootNode : Node2D
 {
     public void SaveScene()
     {
-        SaveAccess saveAccess = SaveAccess.Open("user://Save.txt")
+        SaveAccess saveAccess = SaveAccess.Open("user://Save.txt");
 
-        saveAccess.SaveTree(this)
-        saveAccess.Commit()
+        saveAccess.SaveTree(this);
+        saveAccess.Commit();
     }
 }
 ```
