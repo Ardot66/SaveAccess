@@ -18,7 +18,7 @@ For more information, see the code documentation.
 You have a node, 'Player'. You need to save its position. This is its code:
 
 ```
-public class Player : Node2D
+public partial class Player : Node2D
 {
     public override void _Process()
     {
@@ -32,9 +32,9 @@ To make it save, you would need to set it up like this. (this is using the ISave
 ```
 using Ardot.SaveSystems;
 
-public class Player : Node2D, ISaveable
+public partial class Player : Node2D, ISaveable
 {
-    public override void _Process()
+    public override void _Process(double delta)
     {
         //Movement stuff here
     }
@@ -67,7 +67,7 @@ public class Player : Node2D, ISaveable
 Now, all you would need to save the player would be to have some script that creates a SaveAccess and runs SaveTree().
 
 ```
-public class SceneRootNode : Node2D
+public partial class SceneRootNode : Node2D
 {
     public void SaveScene()
     {
@@ -88,11 +88,11 @@ What you can do is set up Player to save and load its inventory by including the
 ```
 using Ardot.SaveSystems;
 
-public class Player : Node2D, ISaveable
+public partial class Player : Node2D, ISaveable
 {
     public Inventory playerInventory;
 
-    public override void _Process()
+    public override void _Process(double delta)
     {
         //Movement stuff here
     }
@@ -121,7 +121,7 @@ public class Player : Node2D, ISaveable
     {
         //Returning the LoadKey as 'Player'. It's important that this is unique, otherwise data can be confused
         //If there were going to be more than one player, we may want this key to include some other identifier, like the node's path
-        return "Player";.
+        return "Player";
     }
 }
 ```
