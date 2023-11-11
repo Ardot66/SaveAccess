@@ -282,7 +282,7 @@ public partial class SaveData : GodotObject, IEnumerable
 
 		string valueTypeString = input.Keys.First().AsString();
 
-		if (!System.Enum.TryParse(typeof(Variant.Type), valueTypeString, false, out object parseResult))
+		if (input[valueTypeString].AsGodotArray().Count == 0 || !System.Enum.TryParse(typeof(Variant.Type), valueTypeString, false, out object parseResult))
 			return serializedValue;
 
 		Variant.Type valueType = (Variant.Type)parseResult;
