@@ -41,7 +41,8 @@ public class Player : Node2D, ISaveable
   
     public SaveData Save(params Variant[] parameters)
     {
-        return new SaveData(GetLoadKey(), GlobalPosition);
+        //Create and return a new SaveData with its key as GetLoadKey(), and its first value as GlobalPosition
+        return new SaveData(GetLoadKey(), GlobalPosition); 
     }   
     
     public void Load(SaveData data, params Variant[] parameters)
@@ -49,13 +50,16 @@ public class Player : Node2D, ISaveable
         //Checking if data is null, in case something went wrong.
         if(data == null)
           return;
-      
+
+        //Setting GlobalPosition to the first value of data, as a Vector2
         GlobalPosition = data[0].AsVector2();
     }
     
     public StringName GetLoadKey(params Variant[] parameters)
     {
-        return "Player";.
+        //Returning the LoadKey as 'Player'. It's important that this is unique, otherwise data can be confused
+        //If there were going to be more than one player, we may want this key to include some other identifier, like the node's path
+        return "Player";
     }
 }
 ```
@@ -71,6 +75,53 @@ public class SceneRootNode : Node2D
 
         saveAccess.SaveTree(this)
         saveAccess.Commit()
+    }
+}
+```
+
+# Advanced Example
+
+Now, imagine that Player has an inventory. This inventory is a Resource with ISaveable implemented. It won't be automatically saved like nodes, because it isn't directly included in the scene tree. <br/>
+
+What you can do is set up Player to save and load its inventory by including the inventory's SaveData in the player's SaveData.
+
+```
+using Ardot.SaveSystems;
+
+public class Player : Node2D, ISaveable
+{
+    public Inventory playerInventory;
+
+    public override void _Process()
+    {
+        //Movement stuff here
+    }
+  
+    public SaveData Save(params Variant[] parameters)
+    {
+        //Create and return a new SaveData with its key as GetLoadKey(), its first value as GlobalPosition,
+        //and its second value as playerInventory's SaveData
+        return new SaveData(GetLoadKey(), GlobalPosition, playerInventory.Save());
+    }   
+    
+    public void Load(SaveData data, params Variant[] parameters)
+    {
+        //Checking if data is null, in case something went wrong.
+        if(data == null)
+          return;
+
+        //Setting GlobalPosition to the first value of data, as a Vector2
+        GlobalPosition = data[0].AsVector2();
+
+        //Loading playerInventory with the second value of data, which is SaveData
+        playerInventory.Load(data[1])
+    }
+    
+    public StringName GetLoadKey(params Variant[] parameters)
+    {
+        //Returning the LoadKey as 'Player'. It's important that this is unique, otherwise data can be confused
+        //If there were going to be more than one player, we may want this key to include some other identifier, like the node's path
+        return "Player";.
     }
 }
 ```
