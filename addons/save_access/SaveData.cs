@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using Microsoft.VisualBasic;
 using System.Collections;
 using System.Linq;
 
@@ -128,82 +129,63 @@ public partial class SaveData : GodotObject, IEnumerable
 
 		static Variant SerializeData(Variant data)
 		{
-			GodotObject godotObject = data.AsGodotObject();
-
-			if (godotObject is SaveData saveData)
-				return saveData.ToDictionary();
-
-			Array array = data.AsGodotArray();
-
-			if (array.Count > 0)
+			switch (data.VariantType)
 			{
-				for (int x = 0; x < array.Count; x++)
-					array[x] = SerializeData(array[x]);
+				case Variant.Type.Object:
+					GodotObject godotObject = data.AsGodotObject();
 
-				return array;
-			}
+					if (godotObject is SaveData saveData)
+						return saveData.ToDictionary();
 
-			Dictionary dictionary = data.AsGodotDictionary();
+					return data;
 
-			if (dictionary.Count > 0)
-			{
-				foreach (Variant key in dictionary.Keys)
-				{
-					Variant serializedKey = SerializeData(key);
-					Variant serializedValue = SerializeData(dictionary[key]);
-					dictionary.Remove(key);
-					dictionary.Add(serializedKey, serializedValue);
-				}
+				case Variant.Type.Dictionary:
+					Dictionary dictionary = data.AsGodotDictionary();
 
-				return dictionary;
-			}
+					foreach (Variant key in dictionary.Keys)
+					{
+						Variant serializedKey = SerializeData(key);
+						Variant serializedValue = SerializeData(dictionary[key]);
+						dictionary.Remove(key);
+						dictionary.Add(serializedKey, serializedValue);
+					}
 
-			return SerializeStruct(data);
-		}
+					return dictionary;
 
-		static Variant SerializeStruct(Variant value)
-		{
-			Array outputValue;
+				case Variant.Type.Array:
+					Array array = data.AsGodotArray();
 
-			switch (value.VariantType)
-			{
+					for (int x = 0; x < array.Count; x++)
+						array[x] = SerializeData(array[x]);
+
+					return array;
 				case Variant.Type.Vector2:
-					Vector2 vector2 = value.AsVector2();
-					outputValue = new() { vector2.X, vector2.Y };
-					break;
+					Vector2 vector2 = data.AsVector2();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { vector2.X, vector2.Y } } };
 				case Variant.Type.Vector2I:
-					Vector2I vector2I = value.AsVector2I();
-					outputValue = new() { vector2I.X, vector2I.Y };
-					break;
+					Vector2I vector2I = data.AsVector2I();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { vector2I.X, vector2I.Y } } };
 				case Variant.Type.Vector3:
-					Vector3 vector3 = value.AsVector3();
-					outputValue = new() { vector3.X, vector3.Y, vector3.Z };
-					break;
+					Vector3 vector3 = data.AsVector3();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { vector3.X, vector3.Y, vector3.Z } } };
 				case Variant.Type.Vector3I:
-					Vector3I vector3I = value.AsVector3I();
-					outputValue = new() { vector3I.X, vector3I.Y, vector3I.Z };
-					break;
+					Vector3I vector3I = data.AsVector3I();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { vector3I.X, vector3I.Y, vector3I.Z } } };
 				case Variant.Type.Vector4:
-					Vector4 vector4 = value.AsVector4();
-					outputValue = new() { vector4.X, vector4.Y, vector4.Z, vector4.W };
-					break;
+					Vector4 vector4 = data.AsVector4();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { vector4.X, vector4.Y, vector4.Z, vector4.W } } };
 				case Variant.Type.Vector4I:
-					Vector4I vector4I = value.AsVector4I();
-					outputValue = new() { vector4I.X, vector4I.Y, vector4I.Z, vector4I.W };
-					break;
+					Vector4I vector4I = data.AsVector4I();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { vector4I.X, vector4I.Y, vector4I.Z, vector4I.W } } };
 				case Variant.Type.Rect2:
-					Rect2 rect2 = value.AsRect2();
-					outputValue = new() { rect2.Position.X, rect2.Position.Y, rect2.Size.X, rect2.Size.Y };
-					break;
+					Rect2 rect2 = data.AsRect2();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { rect2.Position.X, rect2.Position.Y, rect2.Size.X, rect2.Size.Y } } };
 				case Variant.Type.Rect2I:
-					Rect2I rect2I = value.AsRect2I();
-					outputValue = new() { rect2I.Position.X, rect2I.Position.Y, rect2I.Size.X, rect2I.Size.Y };
-					break;
-				default:
-					return value;
+					Rect2I rect2I = data.AsRect2I();
+					return new Dictionary() { { data.VariantType.ToString(), new Array() { rect2I.Position.X, rect2I.Position.Y, rect2I.Size.X, rect2I.Size.Y } } };
 			}
 
-			return new Dictionary() { { value.VariantType.ToString(), outputValue } };
+			return data;
 		}
 	}
 
@@ -221,77 +203,65 @@ public partial class SaveData : GodotObject, IEnumerable
 
 		static Variant DeserializeData(Variant data)
 		{
-			Dictionary dataDictionary = data.AsGodotDictionary();
-			Variant deserialized = DeserializeStruct(dataDictionary, out bool successful);
-
-			if (successful)
-				return deserialized;
-			else if (FromDictionary(dataDictionary) is SaveData subSaveData)
-				return subSaveData;
-			else if (dataDictionary.Count > 0)
+			switch (data.VariantType)
 			{
-				foreach (Variant key in dataDictionary.Keys)
-				{
-					Variant deserializedValue = DeserializeData(dataDictionary[key]);
-					string keyString = key.AsString();
+				case Variant.Type.Array:
+					Array dataArray = data.AsGodotArray();
 
-					if (keyString.StartsWith('{') && keyString.EndsWith('}'))
+					for (int x = 0; x < dataArray.Count; x++)
+						dataArray[x] = DeserializeData(dataArray[x]);
+
+					return dataArray;
+				case Variant.Type.Dictionary:
+					Dictionary dataDictionary = data.AsGodotDictionary();
+
+					if (dataDictionary.Count == 1)
 					{
-						Variant deserializedKey = DeserializeData(Json.ParseString(keyString));
+						string valueTypeString = dataDictionary.Keys.First().AsString();
+						Array values = dataDictionary[valueTypeString].AsGodotArray();
 
-						dataDictionary.Remove(key);
-						dataDictionary.Add(deserializedKey, deserializedValue);
-						continue;
+						if (values.Count != 0 && System.Enum.TryParse(typeof(Variant.Type), valueTypeString, false, out object parseResult))
+						{
+							Variant.Type valueType = (Variant.Type)parseResult;
+
+							return valueType switch
+							{
+								Variant.Type.Vector2 => (Variant)new Vector2((float)values[0], (float)values[1]),
+								Variant.Type.Vector2I => (Variant)new Vector2I(values[0].AsInt32(), values[1].AsInt32()),
+								Variant.Type.Vector3 => (Variant)new Vector3((float)values[0], (float)values[1], (float)values[2]),
+								Variant.Type.Vector3I => (Variant)new Vector3I(values[0].AsInt32(), values[1].AsInt32(), values[2].AsInt32()),
+								Variant.Type.Vector4 => (Variant)new Vector4((float)values[0], (float)values[1], (float)values[2], (float)values[3]),
+								Variant.Type.Vector4I => (Variant)new Vector4I(values[0].AsInt32(), values[1].AsInt32(), values[2].AsInt32(), values[3].AsInt32()),
+								Variant.Type.Rect2 => (Variant)new Rect2((float)values[0], (float)values[1], (float)values[2], (float)values[3]),
+								Variant.Type.Rect2I => (Variant)new Rect2I(values[0].AsInt32(), values[1].AsInt32(), values[2].AsInt32(), values[3].AsInt32()),
+								_ => data,
+							};
+						}
+					}
+					else if (FromDictionary(dataDictionary) is SaveData subSaveData)
+						return subSaveData;
+
+					foreach (Variant key in dataDictionary.Keys)
+					{
+						Variant deserializedValue = DeserializeData(dataDictionary[key]);
+						string keyString = key.AsString();
+
+						if (keyString.StartsWith('{') && keyString.EndsWith('}'))
+						{
+							Variant deserializedKey = DeserializeData(Json.ParseString(keyString));
+
+							dataDictionary.Remove(key);
+							dataDictionary.Add(deserializedKey, deserializedValue);
+							continue;
+						}
+
+						dataDictionary[key] = deserializedValue;
 					}
 
-					dataDictionary[key] = deserializedValue;
-				}
-
-				return dataDictionary;
-			}
-
-			Array dataArray = data.AsGodotArray();
-
-			if (dataArray.Count > 0)
-			{
-				for (int x = 0; x < dataArray.Count; x++)
-					dataArray[x] = DeserializeData(dataArray[x]);
-
-				return dataArray;
+					return dataDictionary;
 			}
 
 			return data;
 		}
-
-		static Variant DeserializeStruct(Dictionary serializedValue, out bool successful)
-		{
-			successful = false;
-
-			if (serializedValue.Count != 1)
-				return serializedValue;
-
-			string valueTypeString = serializedValue.Keys.First().AsString();
-			Array values = serializedValue[valueTypeString].AsGodotArray();
-
-			if (values.Count == 0 || !System.Enum.TryParse(typeof(Variant.Type), valueTypeString, false, out object parseResult))
-				return serializedValue;
-
-			Variant.Type valueType = (Variant.Type)parseResult;
-			successful = true;
-
-			return valueType switch
-			{
-				Variant.Type.Vector2 => (Variant)new Vector2((float)values[0], (float)values[1]),
-				Variant.Type.Vector2I => (Variant)new Vector2I(values[0].AsInt32(), values[1].AsInt32()),
-				Variant.Type.Vector3 => (Variant)new Vector3((float)values[0], (float)values[1], (float)values[2]),
-				Variant.Type.Vector3I => (Variant)new Vector3I(values[0].AsInt32(), values[1].AsInt32(), values[2].AsInt32()),
-				Variant.Type.Vector4 => (Variant)new Vector4((float)values[0], (float)values[1], (float)values[2], (float)values[3]),
-				Variant.Type.Vector4I => (Variant)new Vector4I(values[0].AsInt32(), values[1].AsInt32(), values[2].AsInt32(), values[3].AsInt32()),
-				Variant.Type.Rect2 => (Variant)new Rect2((float)values[0], (float)values[1], (float)values[2], (float)values[3]),
-				Variant.Type.Rect2I => (Variant)new Rect2I(values[0].AsInt32(), values[1].AsInt32(), values[2].AsInt32(), values[3].AsInt32()),
-				_ => serializedValue,
-			};
-		}
 	}
 }
-
