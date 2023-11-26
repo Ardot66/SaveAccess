@@ -16,7 +16,7 @@ This plugin consists of 3 central parts: (all are located under the Ardot.SaveSy
 
 Together, these allow entire scenes of ISaveable nodes to be saved in just a few lines of code. <br/>
 
-For more information, see the code documentation.
+For more information, see the in-code documentation.
 
 # Example
 
@@ -46,24 +46,23 @@ public partial class Player : Node2D, ISaveable
   
     public SaveData Save(params Variant[] parameters)
     {
-        //Create and return a new SaveData with its key as GetLoadKey(), and its first value as GlobalPosition
+        //Create and return a new SaveData with its key as GetLoadKey(), and
+        //its first value as GlobalPosition
         return new SaveData(GetLoadKey(), GlobalPosition); 
     }   
     
     public void Load(SaveData data, params Variant[] parameters)
     {
-        //Checking if data is null, in case something went wrong.
-        if(data == null)
-          return;
-
         //Setting GlobalPosition to the first value of data, as a Vector2
         GlobalPosition = data[0].AsVector2();
     }
     
     public StringName GetLoadKey(params Variant[] parameters)
     {
-        //Returning the LoadKey as 'Player'. It's important that this is unique, otherwise data can be confused
-        //If there were going to be more than one player, we may want this key to include some other identifier, like the node's path
+        //Returning the LoadKey as 'Player'. It's important that this is
+        //unique, otherwise data can be confused.
+        //If there were going to be more than one player, we may want
+        //this key to include some other identifier, like the node's path
         return "Player";
     }
 }
@@ -104,8 +103,9 @@ public partial class Player : Node2D, ISaveable
   
     public SaveData Save(params Variant[] parameters)
     {
-        //Create and return a new SaveData with its key as GetLoadKey(), its first value as GlobalPosition,
-        //and its second value as playerInventory's SaveData
+        //Create and return a new SaveData with its key as GetLoadKey(),
+        //its first value as GlobalPosition,
+        //and its second value as playerInventory's SaveData.
         return new SaveData(GetLoadKey(), GlobalPosition, playerInventory.Save());
     }   
     
@@ -124,8 +124,10 @@ public partial class Player : Node2D, ISaveable
     
     public StringName GetLoadKey(params Variant[] parameters)
     {
-        //Returning the LoadKey as 'Player'. It's important that this is unique, otherwise data can be confused
-        //If there were going to be more than one player, we may want this key to include some other identifier, like the node's path
+        //Returning the LoadKey as 'Player'. It's important that this is
+        //unique, otherwise data can be confused.
+        //If there were going to be more than one player, we may want
+        //this key to include some other identifier, like the node's path
         return "Player";
     }
 }
