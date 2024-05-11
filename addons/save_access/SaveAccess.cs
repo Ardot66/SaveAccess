@@ -44,7 +44,7 @@ public sealed partial class SaveAccess
 		SaveAccess saveAccess = new(readAccess);
 		readAccess?.Dispose();
 
-		saveAccess._initFileAccess = () => FileAccess.Open(filePath, FileAccess.ModeFlags.WriteRead);
+		saveAccess._initFileAccess = () => FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
 
 		return saveAccess;
 	}
@@ -57,7 +57,7 @@ public sealed partial class SaveAccess
 		SaveAccess saveAccess = new(readAccess);
 		readAccess?.Dispose();
 
-		saveAccess._initFileAccess = () => FileAccess.OpenCompressed(filePath, FileAccess.ModeFlags.WriteRead, compressionMode);
+		saveAccess._initFileAccess = () => FileAccess.OpenCompressed(filePath, FileAccess.ModeFlags.Write, compressionMode);
 
 		return saveAccess;
 	}
@@ -74,7 +74,7 @@ public sealed partial class SaveAccess
 		SaveAccess saveAccess = new(readAccess);
 		readAccess?.Dispose();
 
-		saveAccess._initFileAccess = () => FileAccess.OpenEncrypted(filePath, FileAccess.ModeFlags.WriteRead, key);
+		saveAccess._initFileAccess = () => FileAccess.OpenEncrypted(filePath, FileAccess.ModeFlags.Write, key);
 
 		return saveAccess;
 	}
@@ -87,7 +87,7 @@ public sealed partial class SaveAccess
 		SaveAccess saveAccess = new(readAccess);
 		readAccess?.Dispose();
 
-		saveAccess._initFileAccess = () => FileAccess.OpenEncryptedWithPass(filePath, FileAccess.ModeFlags.WriteRead, pass);
+		saveAccess._initFileAccess = () => FileAccess.OpenEncryptedWithPass(filePath, FileAccess.ModeFlags.Write, pass);
 
 		return saveAccess;
 	}
